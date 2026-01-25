@@ -1,0 +1,52 @@
+{
+  "name": "ai-integrated-terminal",
+  "version": "1.0.0",
+  "description": "AI-powered terminal that translates natural language to shell commands",
+  "main": "electron/main.js",
+  "author": "AI Terminal Project",
+  "license": "MIT",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "electron:dev": "concurrently \"vite\" \"wait-on http://localhost:8080 && cross-env NODE_ENV=development electron .\"",
+    "electron:build": "vite build && electron-builder",
+    "electron:preview": "vite build && electron ."
+  },
+  "dependencies": {
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "electron": "^28.0.0",
+    "electron-builder": "^24.9.1",
+    "concurrently": "^8.2.2",
+    "wait-on": "^7.2.0",
+    "cross-env": "^7.0.3",
+    "vite": "^5.0.0",
+    "@vitejs/plugin-react-swc": "^3.5.0"
+  },
+  "build": {
+    "appId": "com.aiterminal.app",
+    "productName": "AI Integrated Terminal",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "dist/**/*",
+      "electron/**/*",
+      "public/**/*"
+    ],
+    "win": {
+      "target": ["nsis", "portable"],
+      "icon": "public/favicon.ico"
+    },
+    "mac": {
+      "target": ["dmg", "zip"],
+      "icon": "public/favicon.ico"
+    },
+    "linux": {
+      "target": ["AppImage", "deb"],
+      "icon": "public/favicon.ico"
+    }
+  }
+}
