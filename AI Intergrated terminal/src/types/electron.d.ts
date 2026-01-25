@@ -47,8 +47,11 @@ export interface ElectronAPI {
 }
 
 declare global {
-  interface Window {
-    electronAPI?: ElectronAPI;
+ interface Window {
+    electronAPI?: {
+      isElectron: boolean;
+      runAgent: (input: string) => Promise<string>;
+    };
   }
 }
 

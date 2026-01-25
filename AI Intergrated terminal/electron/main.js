@@ -2,6 +2,8 @@
  * Electron Main Process
  * This file creates the native desktop window and handles system-level operations
  */
+import dotenv from 'dotenv';
+dotenv.config();
 
 const { app, BrowserWindow, ipcMain, shell } = require('electron');
 const path = require('path');

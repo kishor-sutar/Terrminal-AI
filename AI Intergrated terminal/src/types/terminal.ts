@@ -1,15 +1,17 @@
 // Terminal types and interfaces for AI Integrated Terminal
 
 export interface CommandHistoryItem {
-  id: string;
-  timestamp: Date;
-  naturalLanguage: string;
-  shellCommand: string;
-  output: string;
-  status: 'success' | 'error' | 'blocked' | 'pending';
-  aiExplanation?: string;
-  executionTime?: number;
+  id
+  timestamp
+  input
+  naturalLanguage
+  shellCommand
+  output
+  status
+  aiExplanation?
+  executionTime?
 }
+
 
 export interface SafetyValidation {
   isSafe: boolean;

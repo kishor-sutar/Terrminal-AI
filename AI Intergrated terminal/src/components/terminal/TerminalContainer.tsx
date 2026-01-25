@@ -1,4 +1,3 @@
-// Main terminal container component
 import { useState, useRef, useEffect } from 'react';
 import { useTerminal } from '@/hooks/useTerminal';
 import { TerminalOutput } from './TerminalOutput';
@@ -11,138 +10,147 @@ import { HistoryPanel } from './HistoryPanel';
 import { CommandHistoryItem } from '@/types/terminal';
 import { Trash2, Download } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
 
 type ActiveView = 'terminal' | 'history' | 'settings' | 'help';
 
 export function TerminalContainer() {
   const {
+    settings,
     commandHistory,
     currentInput,
-    isProcessing,
-    settings,
     suggestions,
+    isProcessing,
     currentTranslation,
     searchQuery,
+
     processInput,
+    updateInput,
     updateSuggestions,
     navigateHistory,
+    updateSettings,
     clearTerminal,
     searchHistory,
-    updateSettings,
-    setCurrentInput,
   } = useTerminal();
 
   const [activeView, setActiveView] = useState<ActiveView>('terminal');
-  const [selectedCommand, setSelectedCommand] = useState<CommandHistoryItem | null>(null);
+  const [selectedCommand, setSelectedCommand] =
+    useState<CommandHistoryItem | null>(null);
+
   const outputRef = useRef<HTMLDivElement>(null);
 
-  // Auto-scroll to bottom when new commands are added
+  // Auto-scroll terminal output
   useEffect(() => {
     if (outputRef.current) {
       outputRef.current.scrollTop = outputRef.current.scrollHeight;
     }
   }, [commandHistory]);
 
-  // Export history as JSON
+  // Export history
   const exportHistory = () => {
     const data = JSON.stringify(commandHistory, null, 2);
     const blob = new Blob([data], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
+
     const a = document.createElement('a');
     a.href = url;
-    a.download = `terminal-history-${new Date().toISOString().split('T')[0]}.json`;
+    a.download = `terminal-history-${new Date()
+      .toISOString()
+      .split('T')[0]}.json`;
     a.click();
+
     URL.revokeObjectURL(url);
   };
 
   const renderContent = () => {
     switch (activeView) {
       case 'settings':
-        return <SettingsPanel settings={settings} onUpdateSettings={updateSettings} />;
+        return (
+          <SettingsPanel
+            settings={settings}
+            onUpdateSettings={updateSettings}
+          />
+        );
+
       case 'help':
         return <HelpPanel />;
+
       case 'history':
         return (
           <HistoryPanel
             history={commandHistory}
+            searchQuery={searchQuery}
+            onSearch={searchHistory}
+            onClearHistory={clearTerminal}
             onSelectCommand={(cmd) => {
               setSelectedCommand(cmd);
               setActiveView('terminal');
             }}
-            onClearHistory={clearTerminal}
-            searchQuery={searchQuery}
-            onSearch={searchHistory}
           />
         );
+
       case 'terminal':
       default:
         return (
           <div className="flex flex-1 min-h-0">
-            {/* Main terminal area */}
+            {/* Main terminal */}
             <div className="flex-1 flex flex-col min-w-0">
-              {/* Terminal header */}
+              {/* Header */}
               <div className="flex items-center justify-between px-4 py-2 bg-card border-b border-border">
-                <div className="flex items-center gap-2">
-                  <div className="flex gap-1.5">
-                    <div className="w-3 h-3 rounded-full bg-destructive/70" />
-                    <div className="w-3 h-3 rounded-full bg-warning/70" />
-                    <div className="w-3 h-3 rounded-full bg-success/70" />
-                  </div>
-                  <span className="text-sm font-mono text-muted-foreground ml-2">
-                    AI Terminal — {settings.shellType}
-                  </span>
-                </div>
-                <div className="flex items-center gap-2">
+                <span className="text-sm font-mono text-muted-foreground">
+                  AI Terminal — {settings.shellType}
+                </span>
+
+                <div className="flex gap-2">
                   <Button
                     variant="ghost"
                     size="sm"
                     onClick={exportHistory}
                     disabled={commandHistory.length === 0}
-                    className="h-7 text-xs"
                   >
-                    <Download className="h-3.5 w-3.5 mr-1" />
+                    <Download className="h-4 w-4 mr-1" />
                     Export
                   </Button>
+
                   <Button
                     variant="ghost"
                     size="sm"
                     onClick={clearTerminal}
                     disabled={commandHistory.length === 0}
-                    className="h-7 text-xs"
                   >
-                    <Trash2 className="h-3.5 w-3.5 mr-1" />
+                    <Trash2 className="h-4 w-4 mr-1" />
                     Clear
                   </Button>
                 </div>
               </div>
 
-              {/* Terminal output */}
-              <div 
+              {/* Output */}
+              <div
                 ref={outputRef}
-                className="flex-1 overflow-y-auto p-4 bg-terminal-bg scrollbar-terminal"
+                className="flex-1 overflow-y-auto p-4 bg-terminal-bg"
                 style={{ fontSize: `${settings.fontSize}px` }}
               >
-                <TerminalOutput 
+                <TerminalOutput
                   history={commandHistory}
                   onSelectCommand={setSelectedCommand}
                 />
               </div>
 
-              {/* Terminal input */}
+              {/* Input */}
               <TerminalInput
                 value={currentInput}
-                onChange={updateSuggestions}
+                onChange={updateInput}
                 onSubmit={processInput}
                 onNavigateHistory={navigateHistory}
-                suggestions={settings.showSuggestions ? suggestions : []}
+                suggestions={
+                  settings.showSuggestions ? suggestions : []
+                }
                 isProcessing={isProcessing}
               />
             </div>
 
-            {/* AI Explanation Panel */}
+            {/* AI Panel */}
             {settings.showAIPanel && (
-              <div className="w-80 lg:w-96 hidden md:block">
+              <div className="w-96 hidden md:block">
                 <AIExplanationPanel
                   selectedCommand={selectedCommand}
                   currentTranslation={currentTranslation}
@@ -157,7 +165,6 @@ export function TerminalContainer() {
 
   return (
     <div className="flex h-screen bg-background overflow-hidden">
-      {/* Sidebar */}
       <Sidebar
         activeItem={activeView}
         onItemClick={setActiveView}
@@ -165,8 +172,7 @@ export function TerminalContainer() {
         searchQuery={searchQuery}
       />
 
-      {/* Main content */}
-      <main className="flex-1 flex flex-col min-w-0 overflow-hidden">
+      <main className="flex-1 flex flex-col overflow-hidden">
         {renderContent()}
       </main>
     </div>
